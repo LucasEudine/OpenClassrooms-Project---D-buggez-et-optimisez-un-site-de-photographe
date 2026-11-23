@@ -122,22 +122,28 @@
       const lightbox = $(`#${lightboxId || "galleryLightbox"}`);
       const lightboxImage = lightbox.find(".lightboxImage");
       const currentSrc = lightboxImage.attr("src");
-      const images = $(".gallery-item")
-        .filter(function() {
-          return $(this).closest(".item-column").is(":visible");
-        })
-        .toArray();
-      const currentIndex = images.findIndex(
-        image => $(image).attr("src") === currentSrc
-      );
+      const images = $(".item-column:visible .gallery-item");
+      let currentIndex = -1;
 
-      if (images.length < 2 || currentIndex === -1) {
+      images.each(function(index) {
+        if ($(this).attr("src") === currentSrc) {
+          currentIndex = index;
+        }
+      });
+
+      if (currentIndex === -1) {
         return;
       }
 
-      const nextIndex =
-        (currentIndex + direction + images.length) % images.length;
-      lightboxImage.attr("src", $(images[nextIndex]).attr("src"));
+      let nextIndex = currentIndex + direction;
+
+      if (nextIndex < 0) {
+        nextIndex = images.length - 1;
+      } else if (nextIndex >= images.length) {
+        nextIndex = 0;
+      }
+
+      lightboxImage.attr("src", images.eq(nextIndex).attr("src"));
     },
     createLightBox(gallery, lightboxId, navigation) {
       gallery.append(`<div class="modal fade" id="${
